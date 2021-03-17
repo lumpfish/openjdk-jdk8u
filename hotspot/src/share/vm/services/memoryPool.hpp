@@ -72,6 +72,7 @@ class MemoryPool : public CHeapObj<mtInternal> {
   MemoryManager*   _managers[max_num_managers];
   int              _num_managers;
   MemoryUsage      _peak_usage;               // Peak memory usage
+  int              _peak_usage_update_count;
   MemoryUsage      _after_gc_usage;           // After GC memory usage
 
   ThresholdSupport* _usage_threshold;
@@ -125,6 +126,7 @@ class MemoryPool : public CHeapObj<mtInternal> {
   void        reset_peak_memory_usage() {
     _peak_usage = get_memory_usage();
   }
+  void update_peak_memory_usage(size_t initial_size, size_t used, size_t committed, size_t max_size);
 
   ThresholdSupport* usage_threshold()      { return _usage_threshold; }
   ThresholdSupport* gc_usage_threshold()   { return _gc_usage_threshold; }

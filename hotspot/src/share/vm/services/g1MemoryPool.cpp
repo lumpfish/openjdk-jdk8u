@@ -55,6 +55,10 @@ MemoryUsage G1EdenPool::get_memory_usage() {
   size_t used       = used_in_bytes();
   size_t committed  = _g1mm->eden_space_committed();
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_sz, used, committed, max_sz);
+  }
+
   return MemoryUsage(initial_sz, used, committed, max_sz);
 }
 
@@ -71,6 +75,9 @@ MemoryUsage G1SurvivorPool::get_memory_usage() {
   size_t used       = used_in_bytes();
   size_t committed  = _g1mm->survivor_space_committed();
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_sz, used, committed, max_sz);
+  }
   return MemoryUsage(initial_sz, used, committed, max_sz);
 }
 
@@ -87,5 +94,8 @@ MemoryUsage G1OldGenPool::get_memory_usage() {
   size_t used       = used_in_bytes();
   size_t committed  = _g1mm->old_space_committed();
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_sz, used, committed, max_sz);
+  }
   return MemoryUsage(initial_sz, used, committed, max_sz);
 }

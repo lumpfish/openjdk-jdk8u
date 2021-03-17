@@ -46,6 +46,10 @@ MemoryUsage PSGenerationPool::get_memory_usage() {
   size_t used      = used_in_bytes();
   size_t committed = _gen->capacity_in_bytes();
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_size(), used, committed, maxSize);
+  }
+
   return MemoryUsage(initial_size(), used, committed, maxSize);
 }
 
@@ -71,6 +75,10 @@ MemoryUsage EdenMutableSpacePool::get_memory_usage() {
   size_t used = used_in_bytes();
   size_t committed = _space->capacity_in_bytes();
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_size(), used, committed, maxSize);
+  }
+
   return MemoryUsage(initial_size(), used, committed, maxSize);
 }
 
@@ -92,5 +100,9 @@ MemoryUsage SurvivorMutableSpacePool::get_memory_usage() {
   size_t maxSize = (available_for_allocation() ? max_size() : 0);
   size_t used    = used_in_bytes();
   size_t committed = committed_in_bytes();
+
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_size(), used, committed, maxSize);
+  }
   return MemoryUsage(initial_size(), used, committed, maxSize);
 }

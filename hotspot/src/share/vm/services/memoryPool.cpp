@@ -50,6 +50,7 @@ MemoryPool::MemoryPool(const char* name,
   _available_for_allocation = true;
   _num_managers = 0;
   _type = type;
+  _peak_usage_update_count = 0;
 
   // initialize the max and init size of collection usage
   _after_gc_usage = MemoryUsage(_initial_size, 0, 0, _max_size);
@@ -146,11 +147,34 @@ void MemoryPool::record_peak_memory_usage() {
   // Caller in JDK is responsible for synchronization -
   // acquire the lock for this memory pool before calling VM
   MemoryUsage usage = get_memory_usage();
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    return;
+  }
   size_t peak_used = get_max_value(usage.used(), _peak_usage.used());
   size_t peak_committed = get_max_value(usage.committed(), _peak_usage.committed());
   size_t peak_max_size = get_max_value(usage.max_size(), _peak_usage.max_size());
 
   _peak_usage = MemoryUsage(initial_size(), peak_used, peak_committed, peak_max_size);
+  if (getenv("PRINT_PEAK_USAGE_UPDATE_COUNT") != NULL) {
+    _peak_usage_update_count++;
+    if ( ( _peak_usage_update_count % 100 ) == 0 ) {
+      printf("_peak_usage_update_count for memoryPool %s now %d\n",_name,_peak_usage_update_count);
+    }
+  }
+}
+
+void MemoryPool::update_peak_memory_usage(size_t initial_size, size_t used, size_t committed, size_t max_size) {
+  size_t peak_used = get_max_value(used, _peak_usage.used());
+  size_t peak_committed = get_max_value(committed, _peak_usage.committed());
+  size_t peak_max_size = get_max_value(max_size, _peak_usage.max_size());
+
+  _peak_usage = MemoryUsage(initial_size, peak_used, peak_committed, peak_max_size);
+  if (getenv("PRINT_PEAK_USAGE_UPDATE_COUNT") != NULL) {
+    _peak_usage_update_count++;
+    if ( ( _peak_usage_update_count % 100 ) == 0 ) {
+      printf("_peak_usage_update_count for memoryPool %s now %d\n",_name,_peak_usage_update_count);
+    }
+  }
 }
 
 static void set_sensor_obj_at(SensorInfo** sensor_ptr, instanceHandle sh) {
@@ -192,6 +216,9 @@ MemoryUsage ContiguousSpacePool::get_memory_usage() {
   size_t used      = used_in_bytes();
   size_t committed = _space->capacity();
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_size(), used, committed, maxSize);
+  }
   return MemoryUsage(initial_size(), used, committed, maxSize);
 }
 
@@ -209,6 +236,9 @@ MemoryUsage SurvivorContiguousSpacePool::get_memory_usage() {
   size_t used    = used_in_bytes();
   size_t committed = committed_in_bytes();
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_size(), used, committed, maxSize);
+  }
   return MemoryUsage(initial_size(), used, committed, maxSize);
 }
 
@@ -227,6 +257,9 @@ MemoryUsage CompactibleFreeListSpacePool::get_memory_usage() {
   size_t used      = used_in_bytes();
   size_t committed = _space->capacity();
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_size(), used, committed, maxSize);
+  }
   return MemoryUsage(initial_size(), used, committed, maxSize);
 }
 #endif // INCLUDE_ALL_GCS
@@ -244,6 +277,9 @@ MemoryUsage GenerationPool::get_memory_usage() {
   size_t committed = _gen->capacity();
   size_t maxSize   = (available_for_allocation() ? max_size() : 0);
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_size(), used, committed, maxSize);
+  }
   return MemoryUsage(initial_size(), used, committed, maxSize);
 }
 
@@ -257,6 +293,10 @@ MemoryUsage CodeHeapPool::get_memory_usage() {
   size_t committed = _codeHeap->capacity();
   size_t maxSize   = (available_for_allocation() ? max_size() : 0);
 
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_size(), used, committed, maxSize);
+  }
+  
   return MemoryUsage(initial_size(), used, committed, maxSize);
 }
 
@@ -265,6 +305,10 @@ MetaspacePool::MetaspacePool() :
 
 MemoryUsage MetaspacePool::get_memory_usage() {
   size_t committed = MetaspaceAux::committed_bytes();
+
+  if (getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") != NULL) {
+    update_peak_memory_usage(initial_size(), used_in_bytes(), committed, max_size());
+  }
   return MemoryUsage(initial_size(), used_in_bytes(), committed, max_size());
 }
 
@@ -286,5 +330,9 @@ size_t CompressedKlassSpacePool::used_in_bytes() {
 
 MemoryUsage CompressedKlassSpacePool::get_memory_usage() {
   size_t committed = MetaspaceAux::committed_bytes(Metaspace::ClassType);
+
+  if ( getenv("UPDATE_PEAK_USAGE_IN_GET_MEMORY_USAGE") ) {
+    update_peak_memory_usage(initial_size(), used_in_bytes(), committed, max_size());
+  }
   return MemoryUsage(initial_size(), used_in_bytes(), committed, max_size());
 }
