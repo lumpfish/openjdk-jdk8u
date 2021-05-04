@@ -165,10 +165,13 @@ public class LineFeedOnlyTest {
 
         String expected;
         if (ignoreLineBreaks) {
+            System.err.println("Trace 1");
             expected = Base64.getEncoder().encodeToString(signingCert.getEncoded());
         } else if (lineFeedOnly) {
+            System.err.println("Trace 2");
             expected = Base64.getMimeEncoder(76, new byte[] {'\n'}).encodeToString(signingCert.getEncoded());
         } else {
+            System.err.println("Trace 3");
             expected = Base64.getMimeEncoder().encodeToString(signingCert.getEncoded());
         }
 
