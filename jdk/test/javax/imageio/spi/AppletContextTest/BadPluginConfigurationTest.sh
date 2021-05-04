@@ -181,7 +181,9 @@ echo ------ PREPARE TEST PLUGIN ---------
 # scratch dir
 
 #PLUGINDST_DIR=$(mktemp -d ${TMP}/iio_test.XXXXXXXX)
-PLUGINDST_DIR=$(mkdir ${TMP}/iio_test.$$)
+PLUGINDST_DIR=${TMP}/iio_test.$$
+rm -rf ${PLUGINDST_DIR}
+mkdir ${PLUGINDST_DIR}
 echo "Created PLUGINDST_DIR as ${PLUGINDST_DIR}"
 
 TEST_PLUGIN=dummy.jar
