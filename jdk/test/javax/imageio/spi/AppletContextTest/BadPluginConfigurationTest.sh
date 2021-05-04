@@ -180,7 +180,8 @@ echo ------ PREPARE TEST PLUGIN ---------
 # app have file read permission for all subdirs of the
 # scratch dir
 
-PLUGINDST_DIR=$(mktemp -d ${TMP}/iio_test.XXXXXXXX)
+#PLUGINDST_DIR=$(mktemp -d ${TMP}/iio_test.XXXXXXXX)
+PLUGINDST_DIR=$(mkdir ${TMP}/iio_test.$$)
 echo "Created PLUGINDST_DIR as ${PLUGINDST_DIR}"
 
 TEST_PLUGIN=dummy.jar
