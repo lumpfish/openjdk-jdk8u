@@ -99,7 +99,8 @@ public class LineFeedOnlyTest {
 
         setup();
         test_create_signature_line_endings(lineFeedOnly, ignoreLineBreaks);
-        if (System.getProperty("last.test") == true) {
+        boolean lastTest = Boolean.getBoolean("last.test");
+        if (lastTest) {
             throw new Exception("Throwing exception to print test output");
         }
     }
