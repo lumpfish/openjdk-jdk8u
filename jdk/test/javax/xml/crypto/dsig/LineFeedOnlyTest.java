@@ -99,7 +99,6 @@ public class LineFeedOnlyTest {
 
         setup();
         test_create_signature_line_endings(lineFeedOnly, ignoreLineBreaks);
-        throw new Exception("Forcing test failure to print test output");
     }
 
     private static void setup() throws Exception {
