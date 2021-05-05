@@ -195,8 +195,10 @@ public class LineFeedOnlyTest {
                 System.err.println("Expected CRLF, but found LF only");
                 //throw new Exception("Expected CRLF, but found LF only");
             }
-            System.err.println("Unexpected output in encoded certificate");
-            //throw new Exception("Unexpected output in encoded certificate");
+            else {
+                System.err.println("Unexpected output in encoded certificate");
+                //throw new Exception("Unexpected output in encoded certificate");
+            }
         }
     }
 
