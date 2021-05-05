@@ -175,6 +175,11 @@ public class LineFeedOnlyTest {
             expected = Base64.getMimeEncoder().encodeToString(signingCert.getEncoded());
         }
 
+        System.err.println("expected is:");
+        System.err.println(expected.toString());
+        System.err.println("actual is:");
+        System.err.println(actual.toString());
+
         if (!expected.equals(actual)) {
             if (ignoreLineBreaks && actual.contains("\n")) {
                 throw new Exception("ignoreLineBreaks did not take precedence over lineFeedOnly");
@@ -183,11 +188,6 @@ public class LineFeedOnlyTest {
             } else if (!lineFeedOnly && !actual.contains("\r\n")) {
                 throw new Exception("Expected CRLF, but found LF only");
             }
-            System.err.println("Unexpected output in encoded certificate");
-            System.err.println("expected is:");
-            System.err.println(expected.toString());
-            System.err.println("actual is:");
-            System.err.println(actual.toString());
             throw new Exception("Unexpected output in encoded certificate");
         }
     }
