@@ -67,7 +67,7 @@ import org.w3c.dom.NodeList;
  * @run main/othervm/timeout=300 -Dcom.sun.org.apache.xml.internal.security.lineFeedOnly=true LineFeedOnlyTest
  * @run main/othervm/timeout=300 -Dcom.sun.org.apache.xml.internal.security.lineFeedOnly=true
  *     -Dcom.sun.org.apache.xml.internal.security.ignoreLineBreaks=true LineFeedOnlyTest
- * @run main/othervm/timeout=300 LineFeedOnlyTest
+ * @run main/othervm/timeout=300 -Dlast.test=true LineFeedOnlyTest
  */
 public class LineFeedOnlyTest {
 
@@ -99,6 +99,9 @@ public class LineFeedOnlyTest {
 
         setup();
         test_create_signature_line_endings(lineFeedOnly, ignoreLineBreaks);
+        if (System.getProperty("last.test") == true) {
+            throw new Exception("Throwing exception to print test output");
+        }
     }
 
     private static void setup() throws Exception {
