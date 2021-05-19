@@ -64,10 +64,14 @@ public class ReplayCacheTestProc {
     public static void main0(String[] args) throws Exception {
         System.setProperty("java.security.krb5.conf", OneKDC.KRB5_CONF);
         if (args.length == 0) { // The controller
-            int ns = 5;     // number of servers
-            int nu = 5;     // number of users
-            int nx = 50;    // number of experiments
-            int np = 5;     // number of peers (services)
+            int ns = 2;     // number of servers
+            int nu = 1;     // number of users
+            int nx = 2;     // number of experiments
+            int np = 1;     // number of peers (services)
+            //int ns = 5;     // number of servers
+            //int nu = 5;     // number of users
+            //int nx = 50;    // number of experiments
+            //int np = 5;     // number of peers (services)
             int mode = 0;   // native(1), random(0), java(-1)
             boolean random = true;      // random experiments choreograph
 
@@ -131,22 +135,27 @@ public class ReplayCacheTestProc {
                 for (int i=0; i<ns; i++) {
                     boolean useNative = (mode == 1) ? true
                             : (mode == -1 ? false : r.nextBoolean());
-                    ps[i] = useNative?ns(i):js(i);
+                    //ps[i] = useNative?ns(i):js(i);
+                    ps[i] = (i==0)?ns(i):js(i);
                 }
                 for (int i=0; i<nx; i++) {
                     result[i] = new Ex();
                     int old;    // which req to send
                     boolean expected;
-                    if (reqs.isEmpty() || r.nextBoolean()) {
-                        Proc.d("Console get new AP-REQ");
+                    //if (reqs.isEmpty() || r.nextBoolean()) {
+                    if (reqs.isEmpty()) {
+                        //Proc.d("Console get new AP-REQ");
+                        Proc.d("Console get new AP-REQ, expecting console sees true");
                         old = req(r.nextInt(nu), r.nextInt(np));
                         expected = true;
                     } else {
-                        Proc.d("Console resue old");
+                        //Proc.d("Console resue old");
+                        Proc.d("Console resue old, expecting console sees false");
                         old = r.nextInt(reqs.size());
                         expected = false;
                     }
-                    int s = r.nextInt(ns);
+                    //int s = r.nextInt(ns);
+                    int s = (i==0)?0:1;
                     Proc.d("Console send to " + s);
                     result[i] = round(i, old, s, expected);
                     Proc.d("Console sees " + result[i].actual);
@@ -171,7 +180,13 @@ public class ReplayCacheTestProc {
                         out?"   ":"xxx",
                         result[i].csize);
             }
-            if (!finalOut) throw new Exception();
+            if (!finalOut) {
+            	System.out.println("Test failed");
+            }
+            else {
+            	System.out.println("Test passed");
+            }
+            throw new Exception();
         } else if (args[0].equals("N-1")) {
             // Native mode sanity check
             Proc.d("Detect start");
@@ -207,6 +222,10 @@ public class ReplayCacheTestProc {
                 } catch (Exception e) {
                     Proc.textOut("false");
                     Proc.d(args[0] + " Bad");
+                    Proc.d("Exception thrown by s.take(token), printing stack trace");
+                    e.printStackTrace();
+                    Proc.d(e);
+                    Proc.d("End of stack trace");
                 }
             }
         }
@@ -256,6 +275,15 @@ public class ReplayCacheTestProc {
         result.peer = reqs.get(old).peer;
         result.old = old;
         result.csize = csize(result.peer);
+        //System.out.println("result.i = " + result.i +
+        //		", result.user = " + result.user  +
+        //		", result.peer = " + result.peer  +
+        //		", result.old = " + result.old  +
+        //		", result.csize = " + result.csize  +
+        //		", result.server = " + result.server  +
+        //		", result.actual = " + result.actual  +
+        //		", result.expected = " + result.expected  +
+        //		", message at index old (" + result.old + ") = " + reqs.get(old).msg);
         result.hash = hash(reqs.get(old).msg);
         if (new File(dfl(result.peer)).exists()) {
             Files.copy(Paths.get(dfl(result.peer)), Paths.get(
